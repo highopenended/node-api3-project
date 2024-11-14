@@ -9,7 +9,6 @@ const Post = require("../posts/posts-model");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  // RETURN AN ARRAY WITH ALL THE USERS
   try {
     const users = await User.get();
     if (!users) {
@@ -45,8 +44,6 @@ router.get("/:id", validateUserId, async (req, res) => {
 });
 
 router.post("/", validateUser, async (req, res) => {
-  // RETURN THE NEWLY CREATED USER OBJECT
-  // this needs a middleware to check that the request body is valid
   try {
     const user = await User.insert({ name: req.name });
     if (!user) {
@@ -65,9 +62,6 @@ router.post("/", validateUser, async (req, res) => {
 });
 
 router.put("/:id", validateUserId, validateUser, async (req, res) => {
-  // RETURN THE FRESHLY UPDATED USER OBJECT
-  // this needs a middleware to verify user id
-  // and another middleware to check that the request body is valid
   try {    
     const user = await User.update(req.user.id, req.body);
     if (!user) {
@@ -86,8 +80,6 @@ router.put("/:id", validateUserId, validateUser, async (req, res) => {
 });
 
 router.delete("/:id", validateUserId, async (req, res) => {
-  // RETURN THE FRESHLY DELETED USER OBJECT
-  // this needs a middleware to verify user id
   try {
     const user = await User.remove(req.user.id);
     if (!user) {
@@ -106,17 +98,16 @@ router.delete("/:id", validateUserId, async (req, res) => {
 });
 
 router.get("/:id/posts", validateUserId, async (req, res) => {
-  // RETURN THE ARRAY OF USER POSTS
-  // this needs a middleware to verify user id
   try {
     const posts = await User.getUserPosts(req.user.id);
+    console.log(posts)
     if (!posts) {
       res.status(404).json({
         message: "Failed to get posts",
       });
     } else {
       console.log("Returning posts");
-      res.status(200).json(req.user.posts);
+      res.status(200).json(posts);
     }
   } catch (err) {
     res.status(500).json({
@@ -126,14 +117,8 @@ router.get("/:id/posts", validateUserId, async (req, res) => {
 });
 
 router.post("/:id/posts", validateUserId, validatePost, async (req, res) => {
-  // RETURN THE NEWLY CREATED USER POST
-  // this needs a middleware to verify user id
-  // and another middleware to check that the request body is valid
   try {
-    const {userID}= req.user.id
-    const {text}=req.text
-    const newPost = await Post.insert({text:text, user_id:userID})
-
+    const newPost = await Post.insert({text:req.text, user_id:req.user.id})
     if (!newPost) {
       res.status(404).json({
         message: "Failed to find posts",
@@ -146,10 +131,6 @@ router.post("/:id/posts", validateUserId, validatePost, async (req, res) => {
       message: "problem finding posts",
     });
   }
-
-
-
 });
 
-// do not forget to export the router
 module.exports = router;
