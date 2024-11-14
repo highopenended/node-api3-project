@@ -25,9 +25,9 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", validateUserId, async (req, res) => {
+router.get("/:id", validateUserId, (req, res) => {
   try {
-    const user = await User.getById(req.user.id);
+    const user = req.user
     if (!user) {
       res.status(404).json({
         message: "user not found",
@@ -45,14 +45,14 @@ router.get("/:id", validateUserId, async (req, res) => {
 
 router.post("/", validateUser, async (req, res) => {
   try {
-    const user = await User.insert({ name: req.name });
-    if (!user) {
+    const newUser = await User.insert({ name: req.name });
+    if (!newUser) {
       res.status(404).json({
         message: "Failed to create user",
       });
     } else {
       console.log("Creating");
-      res.status(200).json(user);
+      res.status(200).json(newUser);
     }
   } catch (err) {
     res.status(500).json({
@@ -100,7 +100,6 @@ router.delete("/:id", validateUserId, async (req, res) => {
 router.get("/:id/posts", validateUserId, async (req, res) => {
   try {
     const posts = await User.getUserPosts(req.user.id);
-    console.log(posts)
     if (!posts) {
       res.status(404).json({
         message: "Failed to get posts",
